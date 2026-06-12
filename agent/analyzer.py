@@ -173,10 +173,16 @@ def analyze(log: AgentLog) -> AuditResult:
 
 if __name__ == "__main__":
     import sys
+    from agent.parser import LogValidationError
+
     if len(sys.argv) != 2:
         print("Usage: python -m agent.analyzer path/to/log.json")
         raise SystemExit(2)
-    result = analyze(parse_log_file(sys.argv[1]))
+    try:
+        result = analyze(parse_log_file(sys.argv[1]))
+    except (OSError, LogValidationError) as exc:
+        print(f"Cannot analyze the file: {exc}")
+        raise SystemExit(2)
     print(f"Score: {result.total}/{result.max_total} | overall risk: {result.overall.upper()}")
     for rule in result.rules:
         print(f"{rule.number}. {rule.name}: {rule.points}/2 — {rule.justification}")
