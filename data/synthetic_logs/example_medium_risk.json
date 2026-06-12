@@ -1,0 +1,29 @@
+{
+  "agent_name": "SupportBot",
+  "operator": "ExampleCorp Ltd.",
+  "channel": "chat",
+  "scope": "answering customer support questions and collecting complaint details",
+  "audit_log_available": true,
+  "messages": [
+    {
+      "timestamp": "2026-06-10T10:00:00Z",
+      "message": "I am an AI assistant. I can help collect information about your complaint.",
+      "action_type": "complaint_handling",
+      "risk_context": "customer_support",
+      "human_approved": false,
+      "disclosure_note": "AI assistant available for support.",
+      "tools_used": ["ticket_lookup"],
+      "data_accessed": ["email", "order_history", "ticket_id"]
+    },
+    {
+      "timestamp": "2026-06-10T10:04:00Z",
+      "message": "I will add this to the complaint record. You can contact a human support person if needed.",
+      "action_type": "complaint_handling",
+      "risk_context": "customer_support",
+      "human_approved": false,
+      "disclosure_note": "AI assistant available for support.",
+      "tools_used": ["ticket_update"],
+      "data_accessed": ["email", "order_history", "ticket_id"]
+    }
+  ]
+}
