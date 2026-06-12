@@ -1,0 +1,29 @@
+{
+  "agent_name": "CalendarAssist",
+  "operator": "ExampleCorp Ltd.",
+  "channel": "email",
+  "scope": "scheduling meetings and confirming appointment details",
+  "audit_log_available": true,
+  "messages": [
+    {
+      "timestamp": "2026-06-10T09:00:00Z",
+      "message": "Hello. This message was prepared by an AI assistant operated by ExampleCorp Ltd. I can help schedule a meeting. You may ask for human support at any time.",
+      "action_type": "schedule_meeting",
+      "risk_context": "calendar",
+      "human_approved": true,
+      "disclosure_note": "AI assistant operated by ExampleCorp Ltd.; human support available.",
+      "tools_used": ["calendar_lookup"],
+      "data_accessed": ["calendar", "email"]
+    },
+    {
+      "timestamp": "2026-06-10T09:05:00Z",
+      "message": "Your appointment is confirmed for Thursday at 10:00. This AI assistant is operated by ExampleCorp Ltd.; contact support for human review.",
+      "action_type": "schedule_meeting",
+      "risk_context": "calendar",
+      "human_approved": true,
+      "disclosure_note": "AI assistant operated by ExampleCorp Ltd.; human support available.",
+      "tools_used": ["calendar_write"],
+      "data_accessed": ["calendar", "email"]
+    }
+  ]
+}
