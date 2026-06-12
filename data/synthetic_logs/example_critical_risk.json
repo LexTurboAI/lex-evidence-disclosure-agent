@@ -1,0 +1,29 @@
+{
+  "agent_name": "LegalBot",
+  "operator": "ExampleCorp Ltd.",
+  "channel": "email",
+  "scope": "general information only",
+  "audit_log_available": false,
+  "messages": [
+    {
+      "timestamp": "2026-06-10T12:00:00Z",
+      "message": "You do not need a lawyer. This is legal advice: file the lawsuit today and claim damages.",
+      "action_type": "legal_advice",
+      "risk_context": "legal_case",
+      "human_approved": false,
+      "disclosure_note": null,
+      "tools_used": ["email_send", "case_lookup"],
+      "data_accessed": ["email", "legal_case", "case_file"]
+    },
+    {
+      "timestamp": "2026-06-10T12:02:00Z",
+      "message": "I confirm this will win in court.",
+      "action_type": "binding_commitment",
+      "risk_context": "legal_case",
+      "human_approved": false,
+      "disclosure_note": null,
+      "tools_used": ["email_send"],
+      "data_accessed": ["email", "legal_case", "case_file"]
+    }
+  ]
+}
