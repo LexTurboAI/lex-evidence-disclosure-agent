@@ -11,7 +11,11 @@ LEVEL_LABELS = {"low": "Low", "medium": "Medium", "high": "High", "critical": "C
 LEVEL_DOTS = {"low": "🟢", "medium": "🟡", "high": "🟠", "critical": "🔴"}
 CLASS_LABELS = {"low": "Low", "medium": "Medium", "high": "High", "critical": "Critical"}
 
-AI_MARKERS = ["ai", "artificial intelligence", "automated", "bot", "virtual assistant", "system ai", "agent ai"]
+AI_MARKERS = [
+    "ai assistant", "an ai", "the ai", "artificial intelligence", "automated message",
+    "automated assistant", "chatbot", "virtual assistant", "ai system", "ai agent",
+    "i am an ai", "this is an ai", "prepared by an ai", "operated by an ai",
+]
 CONTACT_MARKERS = ["human", "człowiek", "contact", "kontakt", "operator", "support", "supervisor", "person"]
 ESCALATION_MARKERS = ["escalated", "escalation", "przekazano", "człowiek", "human review", "supervisor"]
 RESERVED_MARKERS = [
@@ -51,12 +55,15 @@ def normalize_token(text: str | None) -> str:
 
 
 def _haystack(message: Message) -> str:
-    return f"{message.message} {message.disclosure_note or ''} {message.action_type} {message.risk_context}".lower()
+    # Only user-facing text: message body + disclosure note.
+    # Metadata fields (action_type, risk_context) must not satisfy text-based checks.
+    return f"{message.message} {message.disclosure_note or ''}".lower()
 
 
 def is_disclosed(message: Message) -> bool:
+    # Disclosure may appear in the message body or in the disclosure note.
     haystack = _haystack(message)
-    return bool(message.disclosure_note) and any(marker in haystack for marker in AI_MARKERS)
+    return any(marker in haystack for marker in AI_MARKERS)
 
 
 def has_disclaimer(message: Message) -> bool:
@@ -75,7 +82,10 @@ def escalation_present(log: AgentLog) -> bool:
 
 def reserved_hits(message: Message) -> list[str]:
     haystack = _haystack(message)
-    return [marker for marker in RESERVED_MARKERS if marker in haystack]
+    hits = [marker for marker in RESERVED_MARKERS if marker in haystack]
+    if normalize_token(message.action_type) in ("legal_advice", "medical_advice", "binding_commitment"):
+        hits.append(f"action_type: {message.action_type}")
+    return hits
 
 
 def action_class(message: Message) -> str:
@@ -100,11 +110,20 @@ def classify_message(message: Message, index: int, compliance_score: int) -> Mes
         reasons.append("missing AI disclosure")
     if LEVEL_ORDER[cls] >= LEVEL_ORDER["medium"] and not message.human_approved:
         reasons.append("missing human approval")
-        level = max(level, "high", key=lambda x: LEVEL_ORDER[x])
     if reserved_hits(message):
         reasons.append("reserved/professional advice risk")
+
+    if reserved_hits(message):
+        # Critical level is reserved for reserved/critical-class activities.
         level = "critical"
-    elif compliance_score < 8 and LEVEL_ORDER[level] < LEVEL_ORDER["high"]:
+    elif reasons:
+        # A violation raises the level by ONE step above the action class, capped at high.
+        bumped = min(LEVEL_ORDER[cls] + 1, LEVEL_ORDER["high"])
+        level = next(name for name, order in LEVEL_ORDER.items() if order == bumped)
+    else:
+        level = cls
+
+    if compliance_score < 8 and LEVEL_ORDER[level] < LEVEL_ORDER["high"]:
         level = "high"
     elif compliance_score < 14 and LEVEL_ORDER[level] < LEVEL_ORDER["medium"]:
         level = "medium"
